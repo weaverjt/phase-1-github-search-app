@@ -66,11 +66,12 @@ function displayUsers(users, q) {
 //does another fetch to find a specific user id 
 function getCurrentTarget (event) {
 
-const userId = event.currentTarget.id;
+let userId = event.currentTarget.id;
+let q = event.currentTarget.classList.value;
 console.log(userId);
 //const q = event.currentTarget.classList.value; 
 
-fetch(`https://api.github.com/users/${userId}/repos`, {
+fetch(`https://api.github.com/users/`+ q +`/repos`, {
       method: 'GET',
       headers: {
         "Content-Type": "application/json",
@@ -78,80 +79,41 @@ fetch(`https://api.github.com/users/${userId}/repos`, {
       }
     })
       .then((response) => response.json())
-      .then((json) => {console.log(json), displayIt(json, userId)})
+      .then((json) => {console.log(json), displayIt(json)})
       .catch((error) => {
         // handle any errors
         console.log(error)
       });
 
-      function displayIt(user, userId) {
-        // For the list of users
-        console.log(event.currentTarget);
+      function displayIt(user) {
         // For the repositories
         const reposList = document.getElementById('repos-list');
-        const searchTerm = userId;
+        const searchTerm = parseInt(userId);
       
         const thisCard = document.getElementById(searchTerm);
         console.log(thisCard);
-      
-        const filteredUsers = Object.keys(user).forEach(obj => obj.id === searchTerm);
-        console.log(filteredUsers);
-        //user login li
-        const loginLi = document.createElement("li");
-        loginLi.innerHTML = user.login;
-        thisCard.appendChild(loginLi);
-        //user id li
-        const idLi = document.createElement("li");
-        idLi.innerHTML = user.id;
-        thisCard.appendChild(idLi);
-        //user avatar li
-        const img = document.createElement('img');
-        img.src = user.avatar_url;
-        img.classList.add("avatar_url")
-        thisCard.appendChild(img);
-        //repo repos_url
-        const repoLi = document.createElement("li");
-        repoLi.innerHTML = user.repos;
-        reposList.appendChild(repoLi);
-      }
- 
+       
+        const filteredUsers = user.filter((item) => item.id === searchTerm);
+    console.log(filteredUsers);
+          // Clear the existing content of thisCard
+  thisCard.innerHTML = '';
+
+  filteredUsers.forEach((repo) => {
+    // Create a div for each repository
+    const repoDiv = document.createElement('div');
+    repoDiv.classList.add('repository');
+    thisCard.appendChild(repoDiv);
+
+    // Create elements to display owner ID and owner repos
+    const ownerId = document.createElement('p');
+    ownerId.innerHTML = `Owner ID: ${repo.owner.id}`;
+    repoDiv.appendChild(ownerId);
+
+    const ownerRepos = document.createElement('p');
+    ownerRepos.innerHTML = `Owner Repos: ${repo.owner.repos_url}`;
+    repoDiv.appendChild(ownerRepos);
+  });
+  }
+
  
     }
-
-
-
-/*
-I didn't understand exactly what the deliverable was so I think I did some extra work...
-
-function findUser(user, q) {
-const apiObj = [user];
-const searchTerm = q;
-
- // Filter the array based on the login property
- const filteredUsers = apiObj.filter(obj => obj.login === searchTerm);
-
- // Output the filtered array
- console.log(filteredUsers);
-
-Object.keys(apiObj).forEach((key) => {
-  if (searchTerm == user[key].owner.login) {
-    const login = user[key].owner.login;
-    const id = user[key].owner.id;
-    const avatar = user[key].owner.avatar_url;
-    const repos = user[key].owner.repos_url;
-
-    displayIt(login, id, avatar, repos);
-  }
-  else {
-    console.log("User Not Found")
-  }
-});
-
-}    
-*/
-
-//3. Clicking on one of these users should send a request to the User Repos Endpoint and return data about all the repositories for that user.
-
-
-
-//4.Using the response from the Users Repos Endpoint, display all the repositories for that user on the page.
